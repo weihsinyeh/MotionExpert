@@ -2,7 +2,8 @@
 from numpy import array, zeros, full, argmin, inf, ndim
 from scipy.spatial.distance import cdist
 from math import isinf
-
+from utils import time_elapsed
+# @time_elapsed
 def dtw(x, y, dist, warp=1):
     """
     Computes Dynamic Time Warping (DTW) of two sequences in a faster way.
@@ -43,7 +44,7 @@ def dtw(x, y, dist, warp=1):
         path = _traceback(D0)
     return D1[-1, -1], C, D1, path
 
-
+# @time_elapsed
 def _traceback(D):
     i, j = array(D.shape) - 2
     p, q = [i], [j]

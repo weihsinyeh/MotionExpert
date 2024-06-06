@@ -32,7 +32,7 @@ class STA_GCN(nn.Module):
 
         # Feature Extractor
         ## in_channel   6 -> 64
-        f_config = [[in_channels, 32, 1], [32, 32, 1], [32, 32, 1], [32, 64, 2], [64, 64, 1]]
+        f_config = [[in_channels, 32, 1], [32, 32, 1], [32, 32, 1], [32, 64, 1], [64, 64, 1]]
         self.feature_extractor = Feature_extractor(config=f_config, num_person=num_person, **kwargs)
 
         # Attention Branch
