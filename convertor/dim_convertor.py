@@ -38,9 +38,9 @@ class dim_conv(nn.Module):
         #x = F.max_pool2d(x,(x.size(1),1)).squeeze(2)
 
         # Time pool
-    
+        
         x = F.avg_pool2d(x,(x.size(2),1)).squeeze(2)
-
+        print(x.size())
         # Vertexs Pool
         # x = F.avg_pool2d(x,(x.size(2),1)).squeeze(2)
         

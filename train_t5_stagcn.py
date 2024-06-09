@@ -337,13 +337,13 @@ class SimpleT5Model(nn.Module):
             encoder_attentions = out.encoder_attentions
             cross_attentions = out.cross_attentions
             decoder_attentions = out.decoder_attentions
-
+            '''
             encoder_attentions = encoder_attentions.resahpe(out.encoder_attentions.shape[0], out.encoder_attentions.shape[1], -1,22, out.encoder_attentions.shape[3])
             encoder_attentions = encoder_attentions.mean(dim=2)
                 
             cross_attentions = cross_attentions.resahpe(out.cross_attentions.shape[0], out.cross_attentions.shape[1], -1,22, out.cross_attentions.shape[3])
             cross_attentions = cross_attentions.mean(dim=2)
-
+            '''
             html_object = model_view(
                                         encoder_attention=encoder_attentions,
                                         decoder_attention=decoder_attentions,
