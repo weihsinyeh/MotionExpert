@@ -39,10 +39,10 @@ CONFIG.BATCH_SIZE = 128
 # 2. Finetune to Skating : Pretrained = True, Finetune = True
 # 3. Train Skating : Pretrained = False, Finetune = True
 
-CONFIG.Pretrained = False
-CONFIG.Finetune = False
+CONFIG.Pretrained = True
+CONFIG.Finetune = True
 
-CONFIG.weight_path = '/home/weihsin/projects/MotionExpert/models_local_new/Local_epoch50.pt'
+CONFIG.weight_path = '/home/weihsin/projects/MotionExpert_tmp/MotionExpert/models_local_new/Local_epoch5.pt'
 
 if CONFIG.Finetune == False:
     CONFIG.data        = '/home/weihsin/datasets/FigureSkate/HumanML3D_l/local_human_train.pkl'
@@ -52,10 +52,10 @@ if CONFIG.Finetune == False:
     CONFIG.result_dir  = 'STAGCN_output_local_new'
 
 else:
-    #CONFIG.data        = '/home/c1l1mo/projects/VideoAlignment/result/scl_skating_long_50/output_train_label_para6.pkl'
-    CONFIG.data      = '/home/weihsin/datasets/VQA/train_local_with_standard.pkl'
-    CONFIG.out_dir     = './models_finetune_new2'
+    CONFIG.data        = '/home/c1l1mo/projects/VideoAlignment/result/scl_skating_long_50/output_train_label_para6.pkl'
+    #CONFIG.data      = '/home/weihsin/datasets/VQA/train_local_with_standard.pkl'
+    CONFIG.out_dir     = './models_finetune_new'
     CONFIG.prefix      = 'Finetune'
-    #CONFIG.test_data   = '/home/c1l1mo/projects/VideoAlignment/result/scl_skating_long_50/output_test_label_para6.pkl'
-    CONFIG.test_data = '/home/weihsin/datasets/VQA/test_local.pkl'
-    CONFIG.result_dir  = 'STAGCN_output_finetune_new2'
+    CONFIG.test_data   = '/home/c1l1mo/projects/VideoAlignment/result/scl_skating_long_50/output_test_label_para6.pkl'
+    #CONFIG.test_data = '/home/weihsin/datasets/VQA/test_local.pkl'
+    CONFIG.result_dir  = 'STAGCN_output_finetune_new'

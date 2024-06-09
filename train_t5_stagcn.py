@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 import torch
 from torch.nn import functional as nnf
 from transformers import T5ForConditionalGeneration, AutoConfig, AutoTokenizer, AdamW, get_linear_schedule_with_warmup
@@ -112,6 +112,15 @@ class HumanMLDataset_val(Dataset):
             self.data_list = pickle.load(f)
         self.tokenizer = tokenizer
         self.transform = transform
+        global standard
+        for item in self.data_list:
+            features =  generate_data(item['features'])
+            video_name = item['video_name']
+
+            if(video_name == 'standard'):
+                standard = torch.FloatTensor(features)
+                standard = standard.unsqueeze(0)
+                break
 
     def __len__(self):
         return len(self.data_list)
@@ -207,19 +216,18 @@ class SimpleT5Model(nn.Module):
             if finetune == True :
                 start_frame = align(avg_query[i,:current_len,:], avg_key[0] )
             else :
-                start_frame = align(avg_query[i,:current_len,:], avg_key[0] )
+                start_frame = align(avg_query[i,:current_len,:], avg_key[i] )
 
             for j in range(0,22):
-                if (current_len > key[0].size(0)):
-                    if finetune == True:
-                        subtraction = query[i,:key[0].size(0),j,:] - key[0,start_frame:start_frame+key[0].size(0),j,:]
-                    else :
-                        subtraction = query[i,:key[i].size(0),j,:] - key[i,start_frame:start_frame+key[i].size(0),j,:]
-                else:
-                    if finetune == True:
-                        subtraction = query[i,:current_len,j,:] - key[0,start_frame:start_frame+current_len,j,:] ## Tu x 22 x C
-                    else :
-                        subtraction = query[i,:current_len,j,:] - key[i,start_frame:start_frame+current_len,j,:] 
+                
+                if finetune == True and (current_len > key[0].size(0)):
+                    subtraction = query[i,:key[0].size(0),j,:] - key[0,start_frame:start_frame+key[0].size(0),j,:]
+                elif finetune == False and (current_len > key[i].size(0)):
+                    subtraction = query[i,:key[i].size(0),j,:] - key[i,start_frame:start_frame+key[i].size(0),j,:]
+                elif finetune == True and (current_len <= key[0].size(0)):
+                    subtraction = query[i,:current_len,j,:] - key[0,start_frame:start_frame+current_len,j,:] ## Tu x 22 x C
+                elif finetune == False and (current_len <= key[i].size(0)): 
+                    subtraction = query[i,:current_len,j,:] - key[i,start_frame:start_frame+current_len,j,:] 
                 
                 subtraction = interpolate_sequence(subtraction) ## seq_len x 22 x C
                 subtraction = subtraction.unsqueeze(0) ## 1 x seq_len x 22 x C
@@ -249,10 +257,11 @@ class SimpleT5Model(nn.Module):
     def forward(self, input_ids, attention_mask, seq_len,decoder_input_ids=None, labels=None,alignment = True,finetune = False):
         # STAGCN
         self.STAGCN.train()
-        
+   
         embeddings, attention_node, attention_matrix  = self._get_stagcn_feature(input_ids)
         
         if alignment == True:
+            global standard
             # Use standard joints as input of STAGCN to generate standard embedding
             self.STAGCN.eval()
             with torch.no_grad():
@@ -263,11 +272,10 @@ class SimpleT5Model(nn.Module):
                             for k in range(0,6):
                                 standard[i][k][j] = input_ids[i][k][0]
               
-
                 standard_embedding, std_attention_node, std_attention_matrix  = self._get_stagcn_feature(standard.to('cuda'))
                 
             # Alignment
-            embeddings = self._get_alignment_feature(standard_embedding, embeddings,seq_len,finetune = False)
+            embeddings = self._get_alignment_feature(standard_embedding, embeddings,seq_len,finetune)
         # Dim Convertor
         input_embeds = self._get_dim_convertor(embeddings)
  
@@ -289,6 +297,7 @@ class SimpleT5Model(nn.Module):
         if alignment == True:
             # Use standard joints as input of STAGCN to generate standard embedding
             self.STAGCN.eval()
+            global standard
             with torch.no_grad():
                 if finetune == False :
                     standard = input_ids
@@ -396,7 +405,6 @@ def train(train_dataset, model, tokenizer, args, eval_dataset=None, lr=1e-3, war
 
             tgt_input = tgt_batch[:, :-1].to(device)
             tgt_labels = tgt_batch[:, 1:].to(device)
-
             outputs = model(input_ids=src_batch.contiguous(), 
                             attention_mask=keypoints_mask_batch.contiguous(), 
                             seq_len=seq_len.contiguous(),
@@ -510,7 +518,7 @@ def main():
     parser.add_argument('--prefix',     default=CONFIG.prefix, help='prefix for saved filenames')
     parser.add_argument('--epochs',     type=int, default=100)
     parser.add_argument('--save_every', type=int, default=1)
-    parser.add_argument('--bs',         type=int, default=16)
+    parser.add_argument('--bs',         type=int, default=8)
     parser.add_argument('--pretrained', type=bool,default=CONFIG.Pretrained)
     parser.add_argument('--test_data',  default=CONFIG.test_data)
     parser.add_argument('--result_dir',  default = CONFIG.result_dir)
