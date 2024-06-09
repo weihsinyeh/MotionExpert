@@ -40,7 +40,6 @@ class dim_conv(nn.Module):
         # Time pool
         
         x = F.avg_pool2d(x,(x.size(2),1)).squeeze(2)
-        print(x.size())
         # Vertexs Pool
         # x = F.avg_pool2d(x,(x.size(2),1)).squeeze(2)
         

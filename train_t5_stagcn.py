@@ -315,20 +315,20 @@ class SimpleT5Model(nn.Module):
         # Dim Convertor
         input_embeds = self._get_dim_convertor(embeddings)
 
-        beam_size = 3
-        generated_ids = self.t5.generate( return_dict_in_generate=True,
-                                          output_attentions=True,
-                                          inputs_embeds=input_embeds, 
+        beam_size = 1
+        generated_ids = self.t5.generate( inputs_embeds=input_embeds, 
                                           attention_mask=attention_mask, 
                                           decoder_input_ids=decoder_input_ids, 
                                           max_length=50,
                                           num_beams=beam_size, 
                                           repetition_penalty=3.5,
                                           length_penalty=1.0,
-                                          temperature=1.5,   
-                                          do_sample=True,    
+                                          # temperature=1.5,
+                                          return_dict_in_generate=True,
+                                          output_attentions=True,   
+                                          # Set do_sample=True if you want to demo
+                                          do_sample=False,           
                                           early_stopping=True)
-
         if(kwargs['fine_tune'] == True) :
 
             decoded_text = tokenizer.convert_ids_to_tokens(generated_ids.sequences[0])
