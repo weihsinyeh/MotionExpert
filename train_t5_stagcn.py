@@ -1,6 +1,6 @@
 import os
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
 from torch.nn import functional as nnf
 from transformers import T5ForConditionalGeneration, AutoConfig, AutoTokenizer, AdamW, get_linear_schedule_with_warmup
@@ -36,6 +36,10 @@ from convertor.dim_convertor import dim_conv as dim_conv
 from transformers import utils
 from visualize_model import model_view, head_view, neuron_view
 from utils import time_elapsed
+
+from bert_score import score
+from nlgmetricverse import NLGMetricverse,load_metric
+
 bonelink = [(0, 1), (0, 2), (0, 3), (1, 4), (2,5), (3,6), (4, 7), (5, 8), (6, 9), (7, 10), (8, 11), (9, 12), (9, 13), (9, 14), (12, 15), (13, 16), (14, 17), (16, 18), (17, 19), (18,  20), (19, 21)]
 
 
